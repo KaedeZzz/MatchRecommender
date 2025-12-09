@@ -3,6 +3,7 @@
 
 import os
 import json
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 from dotenv import load_dotenv
@@ -16,12 +17,11 @@ client: Optional[OpenAI] = None  # 延迟创建，先检查是否有 API Key
 
 # ===== 你可以按自己喜好改的部分 =====
 
-# （1）你的兴趣画像：先写死，后面可以做成命令行输入或配置文件
-USER_PROFILE = """
-我喜欢：英超、欧冠、西甲、LPL、英雄联盟国际大赛。
+# 用户兴趣配置：默认示例 & 配置文件路径（改为纯文本方便编辑）
+DEFAULT_USER_PROFILE = """我喜欢：英超、欧冠、西甲、LPL、英雄联盟国际大赛。
 优先级：强强对话 > 关键积分战 > 喜欢的队（阿森纳、RNG、TES）。
-不太关注：西甲中游对决、非主流小众联赛。
-"""
+不太关注：西甲中游对决、非主流小众联赛。"""
+USER_PROFILE_PATH = Path(__file__).with_name("user_profile.txt")
 
 # （2）今天 / 这周的比赛列表：目前先自己填几场做 demo
 MATCHES: List[Dict[str, Any]] = [
@@ -70,6 +70,28 @@ def get_client() -> Optional[OpenAI]:
     if client is None:
         client = OpenAI(api_key=api_key)
     return client
+
+
+def load_user_profile(path: Path = USER_PROFILE_PATH) -> str:
+    """
+    从配置文件读取用户兴趣，缺失或异常时回退到默认示例。
+    """
+    if not path.exists():
+        print("未找到 user_profile.txt，已使用默认用户兴趣示例。")
+        return DEFAULT_USER_PROFILE
+
+    try:
+        profile = path.read_text(encoding="utf-8")
+    except Exception as e:
+        print("读取 user_profile.txt 失败，已使用默认用户兴趣示例。错误：", repr(e))
+        return DEFAULT_USER_PROFILE
+
+    profile = profile.strip()
+    if not profile:
+        print("user_profile.txt 为空，已使用默认用户兴趣示例。")
+        return DEFAULT_USER_PROFILE
+
+    return profile
 
 
 def build_prompt(user_profile: str, matches: List[Dict[str, Any]]) -> str:
@@ -207,8 +229,10 @@ def print_recommendations(recommendations: List[Dict[str, Any]],
 def main():
     print("正在生成今日比赛推荐...\n")
 
+    user_profile = load_user_profile()
+
     recommendations = call_model_for_recommendations(
-        user_profile=USER_PROFILE,
+        user_profile=user_profile,
         matches=MATCHES
     )
 
