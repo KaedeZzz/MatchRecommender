@@ -3,7 +3,7 @@
 
 import os
 import json
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -11,7 +11,7 @@ from openai import OpenAI
 # 1. 读取 .env 里的 OPENAI_API_KEY
 load_dotenv()
 
-client = OpenAI()  # SDK 会自动从环境变量里读 OPENAI_API_KEY
+client: Optional[OpenAI] = None  # 延迟创建，先检查是否有 API Key
 
 
 # ===== 你可以按自己喜好改的部分 =====
@@ -55,6 +55,23 @@ MATCHES: List[Dict[str, Any]] = [
 
 # ===== 核心函数：调用 OpenAI 做推荐 =====
 
+
+def get_client() -> Optional[OpenAI]:
+    """
+    运行前先检查是否设置了 OPENAI_API_KEY，避免无 Key 时再请求才报错。
+    """
+    global client
+
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        print("未检测到 OPENAI_API_KEY 环境变量，请在项目根目录创建 .env 并写入 OPENAI_API_KEY=sk-***")
+        return None
+
+    if client is None:
+        client = OpenAI(api_key=api_key)
+    return client
+
+
 def build_prompt(user_profile: str, matches: List[Dict[str, Any]]) -> str:
     """
     把用户兴趣 + 比赛列表拼成一个 prompt 给模型看
@@ -87,10 +104,14 @@ def call_model_for_recommendations(user_profile: str,
         print("没有待选比赛。")
         return []
 
+    api_client = get_client()
+    if api_client is None:
+        return []
+
     prompt = build_prompt(user_profile, matches)
 
     try:
-        response = client.responses.create(
+        response = api_client.responses.create(
             model="gpt-5-nano",  # 便宜好用的通用模型，可按需更换:contentReference[oaicite:1]{index=1}
             input=[
                 {
