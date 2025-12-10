@@ -1,0 +1,236 @@
+[
+  {
+    "id": 552013,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "UEFA Champions League",
+    "teams": "Villarreal CF vs FC København",
+    "time": "2025-12-10T17:45:00+00:00",
+    "importance": "UEFA Champions League | LEAGUE_STAGE | Matchday 6",
+    "status": "TIMED",
+    "matchday": 6,
+    "stage": "LEAGUE_STAGE",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Villarreal CF",
+      "awayTeam": "FC København",
+      "group": null
+    }
+  },
+  {
+    "id": 552034,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "UEFA Champions League",
+    "teams": "Qarabağ Ağdam FK vs AFC Ajax",
+    "time": "2025-12-10T17:45:00+00:00",
+    "importance": "UEFA Champions League | LEAGUE_STAGE | Matchday 6",
+    "status": "TIMED",
+    "matchday": 6,
+    "stage": "LEAGUE_STAGE",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Qarabağ Ağdam FK",
+      "awayTeam": "AFC Ajax",
+      "group": null
+    }
+  },
+  {
+    "id": 540951,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "Championship",
+    "teams": "Ipswich Town FC vs Stoke City FC",
+    "time": "2025-12-10T19:45:00+00:00",
+    "importance": "Championship | Matchday 20",
+    "status": "TIMED",
+    "matchday": 20,
+    "stage": "REGULAR_SEASON",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Ipswich Town FC",
+      "awayTeam": "Stoke City FC",
+      "group": null
+    }
+  },
+  {
+    "id": 540949,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "Championship",
+    "teams": "Derby County FC vs Millwall FC",
+    "time": "2025-12-10T19:45:00+00:00",
+    "importance": "Championship | Matchday 20",
+    "status": "TIMED",
+    "matchday": 20,
+    "stage": "REGULAR_SEASON",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Derby County FC",
+      "awayTeam": "Millwall FC",
+      "group": null
+    }
+  },
+  {
+    "id": 540948,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "Championship",
+    "teams": "Bristol City FC vs Leicester City FC",
+    "time": "2025-12-10T19:45:00+00:00",
+    "importance": "Championship | Matchday 20",
+    "status": "TIMED",
+    "matchday": 20,
+    "stage": "REGULAR_SEASON",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Bristol City FC",
+      "awayTeam": "Leicester City FC",
+      "group": null
+    }
+  },
+  {
+    "id": 551974,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "UEFA Champions League",
+    "teams": "Bayer 04 Leverkusen vs Newcastle United FC",
+    "time": "2025-12-10T20:00:00+00:00",
+    "importance": "UEFA Champions League | LEAGUE_STAGE | Matchday 6",
+    "status": "TIMED",
+    "matchday": 6,
+    "stage": "LEAGUE_STAGE",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Bayer 04 Leverkusen",
+      "awayTeam": "Newcastle United FC",
+      "group": null
+    }
+  },
+  {
+    "id": 551989,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "UEFA Champions League",
+    "teams": "Sport Lisboa e Benfica vs SSC Napoli",
+    "time": "2025-12-10T20:00:00+00:00",
+    "importance": "UEFA Champions League | LEAGUE_STAGE | Matchday 6",
+    "status": "TIMED",
+    "matchday": 6,
+    "stage": "LEAGUE_STAGE",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Sport Lisboa e Benfica",
+      "awayTeam": "SSC Napoli",
+      "group": null
+    }
+  },
+  {
+    "id": 551942,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "UEFA Champions League",
+    "teams": "Borussia Dortmund vs FK Bodø/Glimt",
+    "time": "2025-12-10T20:00:00+00:00",
+    "importance": "UEFA Champions League | LEAGUE_STAGE | Matchday 6",
+    "status": "TIMED",
+    "matchday": 6,
+    "stage": "LEAGUE_STAGE",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Borussia Dortmund",
+      "awayTeam": "FK Bodø/Glimt",
+      "group": null
+    }
+  },
+  {
+    "id": 551969,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "UEFA Champions League",
+    "teams": "Athletic Club vs Paris Saint-Germain FC",
+    "time": "2025-12-10T20:00:00+00:00",
+    "importance": "UEFA Champions League | LEAGUE_STAGE | Matchday 6",
+    "status": "TIMED",
+    "matchday": 6,
+    "stage": "LEAGUE_STAGE",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Athletic Club",
+      "awayTeam": "Paris Saint-Germain FC",
+      "group": null
+    }
+  },
+  {
+    "id": 540950,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "Championship",
+    "teams": "Hull City AFC vs Wrexham AFC",
+    "time": "2025-12-10T20:00:00+00:00",
+    "importance": "Championship | Matchday 20",
+    "status": "TIMED",
+    "matchday": 20,
+    "stage": "REGULAR_SEASON",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Hull City AFC",
+      "awayTeam": "Wrexham AFC",
+      "group": null
+    }
+  },
+  {
+    "id": 551977,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "UEFA Champions League",
+    "teams": "Club Brugge KV vs Arsenal FC",
+    "time": "2025-12-10T20:00:00+00:00",
+    "importance": "UEFA Champions League | LEAGUE_STAGE | Matchday 6",
+    "status": "TIMED",
+    "matchday": 6,
+    "stage": "LEAGUE_STAGE",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Club Brugge KV",
+      "awayTeam": "Arsenal FC",
+      "group": null
+    }
+  },
+  {
+    "id": 551923,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "UEFA Champions League",
+    "teams": "Real Madrid CF vs Manchester City FC",
+    "time": "2025-12-10T20:00:00+00:00",
+    "importance": "UEFA Champions League | LEAGUE_STAGE | Matchday 6",
+    "status": "TIMED",
+    "matchday": 6,
+    "stage": "LEAGUE_STAGE",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Real Madrid CF",
+      "awayTeam": "Manchester City FC",
+      "group": null
+    }
+  },
+  {
+    "id": 552005,
+    "sport": "football",
+    "source": "football-data.org",
+    "league": "UEFA Champions League",
+    "teams": "Juventus FC vs Paphos FC",
+    "time": "2025-12-10T20:00:00+00:00",
+    "importance": "UEFA Champions League | LEAGUE_STAGE | Matchday 6",
+    "status": "TIMED",
+    "matchday": 6,
+    "stage": "LEAGUE_STAGE",
+    "venue": null,
+    "raw": {
+      "homeTeam": "Juventus FC",
+      "awayTeam": "Paphos FC",
+      "group": null
+    }
+  }
+]

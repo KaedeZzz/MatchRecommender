@@ -17,40 +17,10 @@ client: Optional[OpenAI] = None  # 延迟创建，先检查是否有 API Key
 
 # ===== 你可以按自己喜好改的部分 =====
 
-# 用户兴趣配置：默认示例 & 配置文件路径（改为纯文本方便编辑）
-DEFAULT_USER_PROFILE = """我喜欢：英超、欧冠、西甲、LPL、英雄联盟国际大赛。
-优先级：强强对话 > 关键积分战 > 喜欢的队（阿森纳、RNG、TES）。
-不太关注：西甲中游对决、非主流小众联赛。"""
+# 用户配置路径
 USER_PROFILE_PATH = Path(__file__).with_name("user_profile.txt")
-
-# （2）今天 / 这周的比赛列表：目前先自己填几场做 demo
-MATCHES: List[Dict[str, Any]] = [
-    {
-        "id": 1,
-        "sport": "football",
-        "league": "Premier League",
-        "teams": "Arsenal vs Tottenham",
-        "time": "2025-12-09 20:00",
-        "importance": "top4 race"
-    },
-    {
-        "id": 2,
-        "sport": "football",
-        "league": "La Liga",
-        "teams": "Real Madrid vs Sevilla",
-        "time": "2025-12-09 21:00",
-        "importance": "title contender"
-    },
-    {
-        "id": 3,
-        "sport": "esports",
-        "league": "LPL",
-        "game": "League of Legends",
-        "teams": "TES vs JDG",
-        "time": "2025-12-09 18:00",
-        "importance": "top teams clash"
-    },
-]
+# 赛程来源文件
+MATCHES_PATH = Path(__file__).with_name("matches.json")
 
 
 # ===== 核心函数：调用 OpenAI 做推荐 =====
@@ -74,24 +44,46 @@ def get_client() -> Optional[OpenAI]:
 
 def load_user_profile(path: Path = USER_PROFILE_PATH) -> str:
     """
-    从配置文件读取用户兴趣，缺失或异常时回退到默认示例。
+    从配置文件读取用户兴趣，缺失或异常时返回空字符串（需要用户补全）。
     """
     if not path.exists():
-        print("未找到 user_profile.txt，已使用默认用户兴趣示例。")
-        return DEFAULT_USER_PROFILE
+        print("未找到 user_profile.txt，请先填写兴趣偏好。")
+        return ""
 
     try:
         profile = path.read_text(encoding="utf-8")
     except Exception as e:
-        print("读取 user_profile.txt 失败，已使用默认用户兴趣示例。错误：", repr(e))
-        return DEFAULT_USER_PROFILE
+        print("读取 user_profile.txt 失败，请检查文件编码或权限。错误：", repr(e))
+        return ""
 
     profile = profile.strip()
     if not profile:
-        print("user_profile.txt 为空，已使用默认用户兴趣示例。")
-        return DEFAULT_USER_PROFILE
+        print("user_profile.txt 为空，请写入你想要的兴趣描述。")
+        return ""
 
     return profile
+
+
+def load_matches(path: Path = MATCHES_PATH) -> List[Dict[str, Any]]:
+    """
+    读取 `matches.json` 中的比赛列表，失败时返回空数组（需要用户自行生成）。
+    """
+    if not path.exists():
+        print(f"{path.name} 不存在，请先生成或同步比赛数据。")
+        return []
+
+    try:
+        text = path.read_text(encoding="utf-8")
+        data = json.loads(text)
+    except Exception as exc:
+        print(f"读取 {path.name} 失败，请确认 JSON 格式正确。错误：{exc}")
+        return []
+
+    if not isinstance(data, list):
+        print(f"{path.name} 内容不是数组结构，请修复文件。")
+        return []
+
+    return data
 
 
 def build_prompt(user_profile: str, matches: List[Dict[str, Any]]) -> str:
@@ -230,13 +222,14 @@ def main():
     print("正在生成今日比赛推荐...\n")
 
     user_profile = load_user_profile()
+    matches = load_matches()
 
     recommendations = call_model_for_recommendations(
         user_profile=user_profile,
-        matches=MATCHES
+        matches=matches
     )
 
-    print_recommendations(recommendations, MATCHES)
+    print_recommendations(recommendations, matches)
 
 
 if __name__ == "__main__":
