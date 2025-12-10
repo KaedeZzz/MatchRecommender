@@ -9,7 +9,7 @@ from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 from openai import OpenAI
 
-# 1. 读取 .env 里的 OPENAI_API_KEY
+# 读取 .env 里的 OPENAI_API_KEY
 load_dotenv()
 
 client: Optional[OpenAI] = None  # 延迟创建，先检查是否有 API Key
@@ -126,7 +126,7 @@ def call_model_for_recommendations(user_profile: str,
 
     try:
         response = api_client.responses.create(
-            model="gpt-5-nano",  # 便宜好用的通用模型，可按需更换:contentReference[oaicite:1]{index=1}
+            model="gpt-5-nano",  # 便宜好用的通用模型，可按需更换
             input=[
                 {
                     "role": "system",
@@ -137,7 +137,7 @@ def call_model_for_recommendations(user_profile: str,
                     "content": prompt
                 }
             ],
-            # 默认 text 输出即可，通过 SDK 的 output_text 取完整文本:contentReference[oaicite:2]{index=2}
+            # 默认 text 输出即可，通过 SDK 的 output_text 取完整文本
         )
     except Exception as e:
         print("调用 OpenAI API 出错：", repr(e))
@@ -174,7 +174,8 @@ def find_match_by_id(match_id: int, matches: List[Dict[str, Any]]) -> Dict[str, 
 
 
 def print_recommendations(recommendations: List[Dict[str, Any]],
-                          matches: List[Dict[str, Any]]):
+                          matches: List[Dict[str, Any]],
+                          count: int = 10) -> None:
     """
     把推荐结果以比较好看的方式打印出来
     """
@@ -190,7 +191,7 @@ def print_recommendations(recommendations: List[Dict[str, Any]],
     )
 
     print("\n================= 今日推荐比赛 =================\n")
-    for idx, rec in enumerate(recommendations, start=1):
+    for idx, rec in enumerate(recommendations[:count], start=1):
         match = find_match_by_id(rec.get("id"), matches) # type: ignore
         if not match:
             continue
