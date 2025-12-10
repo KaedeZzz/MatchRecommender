@@ -11,19 +11,19 @@ Lightweight CLI script that combines football and esports fixtures with an OpenA
 
 ## Setup
 1. Adjust `user_profile.txt` with your preferred leagues, matches, and sensitivities—this file must exist and contain non-empty text or the recommender won’t have any context.
-2. Keep `matches.json` up to date (the recommender reads from it every run and requires valid JSON; otherwise it reports the issue and produces no choices).
+2. Set football API credentials (see below); matches are fetched on every run, so no local `matches.json` is needed anymore.
 
 ## Usage
 ```sh
 python match_recommender.py
 ```
-The script loads the user profile, crafts a prompt that combines the profile and the current match list, and asks `gpt-5-nano` for ranked recommendations. Results are printed with the recommended score, match info, and the model’s reasoning.
+The script loads the user profile, fetches fixtures from the football API, crafts a prompt that combines the profile and the fresh match list, and asks `gpt-5-nano` for ranked recommendations. Results are printed with the recommended score, match info, and the model’s reasoning.
 
 ## Fetching fixtures
-- Add `FOOTBALL_API_TOKEN=…` (and optionally `FOOTBALL_COMPETITIONS=2001,2014`) to `.env` so `football_api.py` can request `/matches`.
-- Run `python football_api.py` to fetch scheduled fixtures, normalize them, and merge them into `matches.json`. The script keeps non-football entries intact and sorts the file by kickoff time, making it ready for `match_recommender.py`.
-- Update `MATCHES` in `match_recommender.py` to load from `matches.json` once you want to replace the hard-coded list with this generated data.
+- Add `FOOTBALL_API_TOKEN=…` (and optionally `FOOTBALL_COMPETITIONS=2001,2014`) to `.env` so the app can request `/matches` at startup.
+- On every run, `match_recommender.py` fetches scheduled fixtures, normalizes them, and feeds them straight to the recommender (no `matches.json` persisted).
+- If fetching fails (missing token, network, or API error), the run exits without recommendations; fix the issue and rerun.
 
 ## Notes
-- `football_api.py` is a standalone example that shows how you might retrieve fixtures from `football-data.org` using a bearer token. It is not wired into the recommender yet but can serve as a starting point for fetching real match data.
+- `football_api.py` contains the fetch/normalize helpers used by the main script.
 - Keep `user_profile.txt` and `.env` synced with your interests and credentials so the recommendation output stays meaningful.

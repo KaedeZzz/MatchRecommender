@@ -13,7 +13,7 @@ MATCHES_PATH = BASE_DIR / "matches.json"
 FOOTBALL_API_URL = "https://api.football-data.org/v4/matches"
 
 
-def load_api_token() -> Optional[str]:
+def load_football_api_token() -> Optional[str]:
     """从环境变量读取 football-data.org 的访问令牌，确保后续接口可用。"""
     load_dotenv()
     token = os.getenv("FOOTBALL_API_TOKEN")
@@ -123,7 +123,7 @@ def write_matches(matches: List[Dict[str, Any]]):
 
 
 def main():
-    token = load_api_token()
+    token = load_football_api_token()
     if not token:
         return
 

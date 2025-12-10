@@ -8,6 +8,7 @@ from typing import List, Dict, Any, Optional
 
 from dotenv import load_dotenv
 from openai import OpenAI
+from football import fetch_matches, load_football_api_token, normalize_football_match
 
 # 读取 .env 里的 OPENAI_API_KEY
 load_dotenv()
@@ -223,7 +224,18 @@ def main():
     print("正在生成今日比赛推荐...\n")
 
     user_profile = load_user_profile()
-    matches = load_matches()
+
+    # 启动时先拉取 API，再生成推荐；不再依赖持久化的 matches.json
+    matches: List[Dict[str, Any]] = []
+    token = load_football_api_token()
+    if token:
+        try:
+            raw_matches = fetch_matches(token)
+            print(token)
+            matches = [normalize_football_match(m) for m in raw_matches]
+            print(f"已从 API 获取 {len(matches)} 场比赛。")
+        except Exception as exc:
+            print("获取比赛列表失败：", repr(exc))
 
     recommendations = call_model_for_recommendations(
         user_profile=user_profile,
