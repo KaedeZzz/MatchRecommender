@@ -1,0 +1,13 @@
+{
+  "settings": {
+    "time_window": 3
+  },
+  "football": {
+    "api_url": "https://api.football-data.org/v4/matches",
+    "status":
+    [
+      "SCHEDULED",
+      "TIMED"
+    ]
+  }
+}

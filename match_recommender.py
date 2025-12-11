@@ -6,22 +6,21 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
+from config_loader import load_config
+
 from dotenv import load_dotenv
 from openai import OpenAI
 from football import fetch_matches, load_football_api_token, normalize_football_match
 
-# 读取 .env 里的 OPENAI_API_KEY
-load_dotenv()
 
 client: Optional[OpenAI] = None  # 延迟创建，先检查是否有 API Key
 
+BASE_DIR = Path(__file__).resolve().parent
+USER_PROFILE_PATH = BASE_DIR / "user_profile.txt"
 
-# ===== 你可以按自己喜好改的部分 =====
 
-# 用户配置路径
-USER_PROFILE_PATH = Path(__file__).with_name("user_profile.txt")
-# 赛程来源文件
-MATCHES_PATH = Path(__file__).with_name("matches.json")
+load_dotenv()  # 读取 .env 里的 OPENAI_API_KEY
+CONFIG = load_config()
 
 
 # ===== 核心函数：调用 OpenAI 做推荐 =====
@@ -30,6 +29,7 @@ MATCHES_PATH = Path(__file__).with_name("matches.json")
 def get_client() -> Optional[OpenAI]:
     """
     运行前先检查是否设置了 OPENAI_API_KEY，避免无 Key 时再请求才报错。
+    如果有 Key，则创建并返回 OpenAI 客户端实例。
     """
     global client
 
@@ -48,7 +48,7 @@ def load_user_profile(path: Path = USER_PROFILE_PATH) -> str:
     从配置文件读取用户兴趣，缺失或异常时返回空字符串（需要用户补全）。
     """
     if not path.exists():
-        print("未找到 user_profile.txt，请先填写兴趣偏好。")
+        print("未找到 user_profile.txt，请先创建用户偏好文件。")
         return ""
 
     try:
@@ -57,34 +57,12 @@ def load_user_profile(path: Path = USER_PROFILE_PATH) -> str:
         print("读取 user_profile.txt 失败，请检查文件编码或权限。错误：", repr(e))
         return ""
 
-    profile = profile.strip()
+    profile = profile.strip()  # 去掉首尾空白
     if not profile:
         print("user_profile.txt 为空，请写入你想要的兴趣描述。")
         return ""
 
     return profile
-
-
-def load_matches(path: Path = MATCHES_PATH) -> List[Dict[str, Any]]:
-    """
-    读取 `matches.json` 中的比赛列表，失败时返回空数组（需要用户自行生成）。
-    """
-    if not path.exists():
-        print(f"{path.name} 不存在，请先生成或同步比赛数据。")
-        return []
-
-    try:
-        text = path.read_text(encoding="utf-8")
-        data = json.loads(text)
-    except Exception as exc:
-        print(f"读取 {path.name} 失败，请确认 JSON 格式正确。错误：{exc}")
-        return []
-
-    if not isinstance(data, list):
-        print(f"{path.name} 内容不是数组结构，请修复文件。")
-        return []
-
-    return data
 
 
 def build_prompt(user_profile: str, matches: List[Dict[str, Any]]) -> str:
@@ -120,7 +98,7 @@ def call_model_for_recommendations(user_profile: str,
         return []
 
     api_client = get_client()
-    if api_client is None:
+    if api_client is None:  # 没有生成客户端实体
         return []
 
     prompt = build_prompt(user_profile, matches)
@@ -231,7 +209,6 @@ def main():
     if token:
         try:
             raw_matches = fetch_matches(token)
-            print(token)
             matches = [normalize_football_match(m) for m in raw_matches]
             print(f"已从 API 获取 {len(matches)} 场比赛。")
         except Exception as exc:

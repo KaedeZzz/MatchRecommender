@@ -1,16 +1,22 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import requests
 from dotenv import load_dotenv
+from config_loader import load_config
 
 BASE_DIR = Path(__file__).resolve().parent
+CONFIG_PATH = BASE_DIR / "config.json"
 MATCHES_PATH = BASE_DIR / "matches.json"
 # football-data.org 提供的比赛列表接口，params 决定具体筛选
-FOOTBALL_API_URL = "https://api.football-data.org/v4/matches"
+
+CONFIG = load_config()
+FOOTBALL_API_URL = CONFIG["football"]["api_url"]
+STATUS_LIST = CONFIG["football"].get("status", ["SCHEDULED"])
+TIME_WINDOW = CONFIG["settings"].get("time_window", 3)
 
 
 def load_football_api_token() -> Optional[str]:
@@ -23,24 +29,32 @@ def load_football_api_token() -> Optional[str]:
     return token
 
 
-def fetch_matches(token: str, status: str = "SCHEDULED") -> List[Dict[str, Any]]:
+def fetch_matches(token: str, status_list: list[str] = ["SCHEDULED"]) -> List[Dict[str, Any]]:
     """使用提供的 token 查询指定状态的足球比赛列表（默认只请求 SCHEDULED）。"""
+    today = date.today()
     headers = {"X-Auth-Token": token}
-    params = {"status": status}
-    competitions = os.getenv("FOOTBALL_COMPETITIONS")
-    if competitions:
-        # 允许通过环境变量限定需要的联赛编号（逗号分隔）
-        params["competitions"] = competitions
+    results = []
+    for status in STATUS_LIST:
+        params = {
+            "status": status,
+            "dateFrom": today.isoformat(),
+            "dateTo": (today + timedelta(days=TIME_WINDOW)).isoformat()
+            }
+        competitions = os.getenv("FOOTBALL_COMPETITIONS")
+        if competitions:
+            # 允许通过环境变量限定需要的联赛编号（逗号分隔）
+            params["competitions"] = competitions
 
-    # 设定较短超时时间避免请求挂起
-    response = requests.get(FOOTBALL_API_URL, headers=headers, params=params, timeout=15)
-    response.raise_for_status()
-    payload = response.json()
-    return payload.get("matches", [])
+        # 设定较短超时时间避免请求挂起
+        response = requests.get(FOOTBALL_API_URL, headers=headers, params=params, timeout=15)
+        response.raise_for_status()
+        payload = response.json()
+        results += payload.get("matches", [])
+    return results
 
 
 def normalize_time(value: Optional[str]) -> str:
-    """统一把 API 买来的 UTC 时间字符串转成可读的 ISO 8601 表示。"""
+    """统一把 API 抓取的 UTC 时间字符串转成可读的 ISO 8601 表示。"""
     if not value:
         return ""
     try:
