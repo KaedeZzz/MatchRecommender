@@ -1,5 +1,6 @@
 {
   "settings": {
+    "model": "gpt-5-nano",
     "time_window": 3
   },
   "football": {

@@ -21,6 +21,7 @@ USER_PROFILE_PATH = BASE_DIR / "user_profile.txt"
 
 load_dotenv()  # 读取 .env 里的 OPENAI_API_KEY
 CONFIG = load_config()
+MODEL = CONFIG["settings"].get("model", "gpt-5-nano")
 
 
 # ===== 核心函数：调用 OpenAI 做推荐 =====
@@ -105,7 +106,7 @@ def call_model_for_recommendations(user_profile: str,
 
     try:
         response = api_client.responses.create(
-            model="gpt-5-nano",  # 便宜好用的通用模型，可按需更换
+            model=MODEL,
             input=[
                 {
                     "role": "system",
