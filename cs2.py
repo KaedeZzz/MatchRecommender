@@ -15,6 +15,8 @@ MATCHES_PATH = BASE_DIR / "matches.json"
 
 CONFIG = load_config()
 CS2_API_URL = CONFIG["cs2"]["api_url"]
+STATUS = CONFIG["cs2"]["status"]
+TIER = CONFIG["cs2"]["tier"]
 
 
 def load_cs2_api_token() -> Optional[str]:
@@ -27,11 +29,20 @@ def load_cs2_api_token() -> Optional[str]:
     return token
 
 
+def build_cs2_api_url(verbose: bool = False) -> str:
+    """构建 CS2 比赛数据的 API URL，包含必要的查询参数。"""
+    url = CS2_API_URL + "/{}?range[tier]={}".format(STATUS, ",".join(TIER))
+    if verbose:
+        print("CS2 API URL:", url)
+    return url
+
+
 def fetch_cs2_matches(token: str) -> List[Dict[str, Any]]:
     params = {
         "token": token
     }
-    response = requests.get(CS2_API_URL, params=params, timeout=15)
+    url = build_cs2_api_url()
+    response = requests.get(url, params=params, timeout=15)
     response.raise_for_status()
     res = []
     for match in response.json()[0]["matches"]:
