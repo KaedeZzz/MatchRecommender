@@ -10,5 +10,13 @@
       "SCHEDULED",
       "TIMED"
     ]
+  },
+  "cs2": {
+    "api_url": "https://api.pandascore.co/csgo/tournaments",
+    "status": "running",
+    "tier": [
+      "s",
+      "s"
+    ]
   }
 }
