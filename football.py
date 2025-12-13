@@ -29,7 +29,7 @@ def load_football_api_token() -> Optional[str]:
     return token
 
 
-def fetch_matches(token: str, status_list: list[str] = ["SCHEDULED"]) -> List[Dict[str, Any]]:
+def fetch_football_matches(token: str, status_list: list[str] = ["SCHEDULED"]) -> List[Dict[str, Any]]:
     """使用提供的 token 查询指定状态的足球比赛列表（默认只请求 SCHEDULED）。"""
     today = date.today()
     headers = {"X-Auth-Token": token}
@@ -142,7 +142,7 @@ def main():
         return
 
     try:
-        raw_matches = fetch_matches(token)
+        raw_matches = fetch_football_matches(token)
     except requests.HTTPError as exc:
         print("Failed to fetch football fixtures:", exc)
         return

@@ -10,8 +10,8 @@ from config_loader import load_config
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from football import fetch_matches, load_football_api_token, normalize_football_match
-
+from football import fetch_football_matches, load_football_api_token, normalize_football_match
+from cs2 import fetch_cs2_matches, load_cs2_api_token, normalize_cs2_match
 
 client: Optional[OpenAI] = None  # 延迟创建，先检查是否有 API Key
 
@@ -204,16 +204,30 @@ def main():
 
     user_profile = load_user_profile()
 
-    # 启动时先拉取 API，再生成推荐；不再依赖持久化的 matches.json
+    # 启动时先拉取 API，再生成推荐
     matches: List[Dict[str, Any]] = []
-    token = load_football_api_token()
-    if token:
+
+    football_token = load_football_api_token()
+    football_matches = []
+    if football_token:
         try:
-            raw_matches = fetch_matches(token)
-            matches = [normalize_football_match(m) for m in raw_matches]
-            print(f"已从 API 获取 {len(matches)} 场比赛。")
+            raw_football_matches = fetch_football_matches(football_token)
+            football_matches = [normalize_football_match(m) for m in raw_football_matches]
+            print(f"已从 API 获取 {len(football_matches)} 场足球比赛。")
         except Exception as exc:
             print("获取比赛列表失败：", repr(exc))
+
+    cs2_token = load_cs2_api_token()
+    cs2_matches = []
+    if cs2_token:
+        try:
+            raw_cs2_matches = fetch_cs2_matches(cs2_token)
+            cs2_matches = [normalize_cs2_match(m) for m in raw_cs2_matches]
+            print(f"已从 API 获取 {len(cs2_matches)} 场 CS2 比赛。")
+        except Exception as exc:
+            print("获取比赛列表失败：", repr(exc))
+    
+    matches = football_matches + cs2_matches
 
     recommendations = call_model_for_recommendations(
         user_profile=user_profile,
