@@ -83,6 +83,7 @@ def build_prompt(user_profile: str, matches: List[Dict[str, Any]]) -> str:
 1. 返回一个 JSON 对象，字段为 "recommendations"（数组）。
 2. recommendations 数组中每个元素包含字段：
    - id: 比赛 id（整数）
+   - teams：比赛双方的队名，格式如 "队伍A vs 队伍B"，不要包括别的信息。如果不是电竞比赛，则把队名全部翻译成中文。如果是电竞比赛，则把队名的缩写扩展成队伍全名。
    - score: 推荐分数（0-100 的整数，越高越推荐）
    - reason: 中文推荐理由，1-2 句话。
 3. 只输出 JSON，不要任何额外解释、文字或代码块标记。
@@ -178,8 +179,9 @@ def print_recommendations(recommendations: List[Dict[str, Any]],
 
         score = rec.get("score", 0)
         reason = rec.get("reason", "")
+        teams = rec.get("teams", match.get("teams", "未知队伍"))
 
-        print(f"{idx}. [{score:>3} 分] {match.get('teams')}")
+        print(f"{idx}. [{score:>3} 分] {teams}")
 
         extra = []
         if match.get("league"):
