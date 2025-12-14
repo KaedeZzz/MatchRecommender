@@ -51,8 +51,9 @@ def fetch_cs2_matches(token: str) -> List[Dict[str, Any]]:
         serie = tournament.get("serie", {}).get("name")
         name = str(league or "") + " " + str(serie or "")
         for match in tournament.get("matches", []):
-            match["tournament"] = name
-            match_list.append(match)
+            if not "TBD" in match.get("name", ""):
+                match["tournament"] = name
+                match_list.append(match)
     return match_list
 
 
