@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -46,14 +46,27 @@ def fetch_cs2_matches(token: str) -> List[Dict[str, Any]]:
     response.raise_for_status()
     match_list = []
     tournament_list = response.json()
+    now = datetime.now(timezone.utc)
     for tournament in response.json():
         league = tournament.get("league", {}).get("name")
         serie = tournament.get("serie", {}).get("name")
         name = str(league or "") + " " + str(serie or "")
         for match in tournament.get("matches", []):
-            if not "TBD" in match.get("name", ""):
-                match["tournament"] = name
-                match_list.append(match)
+            if "TBD" in match.get("name", ""):
+                continue
+
+            start = match.get("begin_at") or match.get("scheduled_at")
+            match_time = None
+            if start:
+                try:
+                    match_time = datetime.fromisoformat(start.replace("Z", "+00:00"))
+                except ValueError:
+                    match_time = None
+            if match_time and match_time < now:
+                continue
+
+            match["tournament"] = name
+            match_list.append(match)
     return match_list
 
 
