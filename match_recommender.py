@@ -13,6 +13,9 @@ from openai import OpenAI
 from football import fetch_football_matches, load_football_api_token, normalize_football_match
 from cs2 import fetch_cs2_matches, load_cs2_api_token, normalize_cs2_match
 
+from time_utils import convert_utc_to_local_time
+
+
 client: Optional[OpenAI] = None  # 延迟创建，先检查是否有 API Key
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -154,49 +157,48 @@ def find_match_by_id(match_id: int, matches: List[Dict[str, Any]]) -> Dict[str, 
     return {}
 
 
-def print_recommendations(recommendations: List[Dict[str, Any]],
-                          matches: List[Dict[str, Any]],
+def print_recommendations(recommendations: List[Dict[str, Any]], matches: List[Dict[str, Any]],
                           count: int = 10) -> None:
     """
-    把推荐结果以比较好看的方式打印出来
+    打印个性化赛事推荐结果（适配本机时区展示时间）
+    :param recommendations: AI生成的推荐列表（含score/reason/id）
+    :param matches: 标准化后的赛事数据列表
+    :param count: 展示的推荐数量，默认前10
     """
-    if not recommendations:
-        print("没有推荐结果。")
-        return
+    # 1. 按推荐分数降序排序，限制展示数量
+    sorted_recs = sorted(recommendations, key=lambda x: x["score"], reverse=True)[:count]
 
-    # 按 score 从高到低排一下（模型一般已经排好，这里再保险一下）
-    recommendations = sorted(
-        recommendations,
-        key=lambda r: r.get("score", 0),
-        reverse=True
-    )
+    # 2. 打印标题
+    print("\n=== 个性化赛事推荐===")
 
-    print("\n================= 今日推荐比赛 =================\n")
-    for idx, rec in enumerate(recommendations[:count], start=1):
-        match = find_match_by_id(rec.get("id"), matches) # type: ignore
-        if not match:
+    # 3. 遍历推荐结果，逐个格式化打印
+    for idx, rec in enumerate(sorted_recs, 1):
+        # 3.1 根据赛事ID匹配原始赛事数据（处理无匹配的异常）
+
+        try:
+            match = next(m for m in matches if m["id"] == rec["id"])
+        except StopIteration:
+            print(f"{idx}. 推荐分数：{rec['score']}分 | 赛事数据不存在（ID：{rec['id']}）")
             continue
 
-        score = rec.get("score", 0)
-        reason = rec.get("reason", "")
-        teams = rec.get("teams", match.get("teams", "未知队伍"))
+        # 3.2 将UTC时间转为本机时区时间
+        original_utc_time = match.get("time", "未知时间")  # 防KeyError
+        local_time = convert_utc_to_local_time(original_utc_time)
 
-        print(f"{idx}. [{score:>3} 分] {teams}")
+        # 3.3 格式化打印
+        score = rec["score"]  # 推荐分数
+        teams_str = match.get("teams", "未知对阵")  # 完整对阵字符串（含阶段）
+        local_time = convert_utc_to_local_time(match.get("time", "未知时间"))  # 转换后的时间
+        sport = match.get("sport", "未知项目")  # 项目/运动类型
+        league = match.get("league", sport)  # 联赛（无则用项目填充）
+        importance = match.get("importance", "未知重要性")  # 重要性
+        reason = rec.get("reason", "无推荐理由")  # 推荐理由
 
-        extra = []
-        if match.get("league"):
-            extra.append(match["league"])
-        if match.get("sport"):
-            extra.append(match["sport"])
-        if match.get("game"):
-            extra.append(match["game"])
-        extra_str = " | ".join(extra)
-
-        print(f"   时间: {match.get('time', '未知时间')}")
-        if extra_str:
-            print(f"   联赛/项目: {extra_str}")
-        if match.get("importance"):
-            print(f"   重要性: {match['importance']}")
+        # 2. 按指定格式拼接输出（严格匹配示例）
+        print(f"{idx}. [ {score} 分] {teams_str}")
+        print(f"   时间: {local_time}（{sport} | 本机时区）")
+        print(f"   联赛/项目: {league}")
+        print(f"   重要性: {importance}")
         print(f"   推荐理由: {reason}")
         print()
 
@@ -237,6 +239,8 @@ def main():
     )
 
     print_recommendations(recommendations, matches)
+
+
 
 
 if __name__ == "__main__":
