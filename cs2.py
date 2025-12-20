@@ -22,10 +22,10 @@ TIER = CONFIG["cs2"]["tier"]
 def load_cs2_api_token() -> Optional[str]:
     """从环境变量读取 CS2 比赛数据的访问令牌，确保后续接口可用。"""
     load_dotenv()
-    token = os.getenv("CS2_API_TOKEN")
+    token = os.getenv("PANDASCORE_API_TOKEN")
     if not token:
         # 提示用户补充 token 以便后续调用，主流程会在没有 token 时提前退出。
-        print("Please provide CS2_API_TOKEN=… in your .env so we can call the CS2 API.")
+        print("Please provide PANDASCORE_API_TOKEN=… in your .env so we can call the CS2 API.")
     return token
 
 
