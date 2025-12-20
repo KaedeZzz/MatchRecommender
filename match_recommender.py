@@ -3,6 +3,7 @@
 
 import os
 import json
+from time import perf_counter
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
@@ -10,7 +11,7 @@ from config_loader import load_config
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from football import fetch_football_matches, load_football_api_token, normalize_football_match
+from football import fetch_football_matches, load_allowed_competitions, load_football_api_token, normalize_football_match
 from cs2 import fetch_cs2_matches, load_cs2_api_token, normalize_cs2_match
 from lol import fetch_lol_matches, load_lol_api_token, normalize_lol_match
 
@@ -26,6 +27,7 @@ USER_PROFILE_PATH = BASE_DIR / "user_profile.txt"
 load_dotenv()  # 读取 .env 里的 OPENAI_API_KEY
 CONFIG = load_config()
 MODEL = CONFIG["settings"].get("model", "gpt-5-nano")
+DEBUG_MODE = CONFIG["settings"].get("debug_mode", False)
 
 
 # ===== 核心函数：调用 OpenAI 做推荐 =====
@@ -89,7 +91,7 @@ def build_prompt(user_profile: str, matches: List[Dict[str, Any]]) -> str:
    - id: 比赛 id（整数）
    - teams：比赛双方的队名，格式如 "队伍A vs 队伍B"，不要包括别的信息。如果不是电竞比赛，则把队名全部翻译成中文。如果是电竞比赛，则把队名的缩写扩展成队伍全名。
    - score: 推荐分数（0-100 的整数，越高越推荐）
-   - reason: 中文推荐理由，1-2 句话。
+   - reason: 推荐理由（简短说明为什么推荐这场比赛，围绕用户兴趣展开）
 3. 只输出 JSON，不要任何额外解释、文字或代码块标记。
 """
 
@@ -109,6 +111,7 @@ def call_model_for_recommendations(user_profile: str,
 
     prompt = build_prompt(user_profile, matches)
 
+    start = perf_counter()
     try:
         response = api_client.responses.create(
             model=MODEL,
@@ -127,6 +130,10 @@ def call_model_for_recommendations(user_profile: str,
     except Exception as e:
         print("调用 OpenAI API 出错：", repr(e))
         return []
+
+    if DEBUG_MODE:
+        elapsed = perf_counter() - start
+        print(f"[debug] OpenAI API call took {elapsed:.2f}s")
 
     # SDK 会帮你把所有 text 输出拼在一起放到 output_text 里
     raw_text = getattr(response, "output_text", None)
@@ -168,6 +175,8 @@ def print_recommendations(recommendations: List[Dict[str, Any]], matches: List[D
     """
     # 1. 按推荐分数降序排序，限制展示数量
     sorted_recs = sorted(recommendations, key=lambda x: x["score"], reverse=True)[:count]
+    if DEBUG_MODE:
+        print(f"已推荐{len(sorted_recs)}场比赛。")
 
     # 2. 打印标题
     print("\n=== 个性化赛事推荐===")
@@ -217,6 +226,13 @@ def main():
     if football_token:
         try:
             raw_football_matches = fetch_football_matches(football_token)
+            allowed_competitions = load_allowed_competitions()
+            if allowed_competitions:
+                raw_football_matches = [
+                    match
+                    for match in raw_football_matches
+                    if (match.get("competition") or {}).get("name") in allowed_competitions
+                ]
             football_matches = [normalize_football_match(m) for m in raw_football_matches]
             print(f"已从 API 获取 {len(football_matches)} 场足球比赛。")
         except Exception as exc:

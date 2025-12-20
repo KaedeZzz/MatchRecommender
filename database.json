@@ -1,0 +1,15 @@
+{
+    "football":
+    {
+        "top_leagues":
+        [
+            "Premier League",
+            "Primera Division",
+            "Bundesliga",
+            "Serie A",
+            "Ligue 1",
+            "UEFA Champions League",
+            "UEFA Europa League"
+        ]
+    }
+}
