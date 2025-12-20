@@ -18,5 +18,13 @@
       "s",
       "s"
     ]
+  },
+  "lol": {
+    "api_url": "https://api.pandascore.co/lol/tournaments",
+    "status": "running",
+    "tier": [
+      "a",
+      "s"
+    ]
   }
 }

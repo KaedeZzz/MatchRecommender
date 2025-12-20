@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from football import fetch_football_matches, load_football_api_token, normalize_football_match
 from cs2 import fetch_cs2_matches, load_cs2_api_token, normalize_cs2_match
+from lol import fetch_lol_matches, load_lol_api_token, normalize_lol_match
 
 from time_utils import convert_utc_to_local_time
 
@@ -230,8 +231,18 @@ def main():
             print(f"已从 API 获取 {len(cs2_matches)} 场 CS2 比赛。")
         except Exception as exc:
             print("获取比赛列表失败：", repr(exc))
+
+    lol_token = load_lol_api_token()
+    lol_matches = []
+    if lol_token:
+        try:
+            raw_lol_matches = fetch_lol_matches(lol_token)
+            lol_matches = [normalize_lol_match(m) for m in raw_lol_matches]
+            print(f"已从 API 获取 {len(lol_matches)} 场 LoL 比赛。")
+        except Exception as exc:
+            print("获取比赛列表失败：", repr(exc))
     
-    matches = football_matches + cs2_matches
+    matches = football_matches + cs2_matches + lol_matches
 
     recommendations = call_model_for_recommendations(
         user_profile=user_profile,
