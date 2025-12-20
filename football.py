@@ -11,6 +11,7 @@ from config_loader import load_config
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / "config.json"
 MATCHES_PATH = BASE_DIR / "matches.json"
+DATABASE_PATH = BASE_DIR / "database.json"
 # football-data.org 提供的比赛列表接口，params 决定具体筛选
 
 CONFIG = load_config()
@@ -106,6 +107,20 @@ def normalize_football_match(raw: Dict[str, Any]) -> Dict[str, Any]:
             "group": raw.get("group"),
         },
     }
+
+
+def load_allowed_competitions() -> Set[str]:
+    if not DATABASE_PATH.exists():
+        return set()
+    try:
+        with DATABASE_PATH.open("r", encoding="utf-8") as fh:
+            data = json.load(fh)
+    except json.JSONDecodeError as exc:
+        print(f"Warning: {DATABASE_PATH} contained invalid JSON ({exc}), skipping league filter.")
+        return set()
+    football = data.get("football", {}) or {}
+    top_leagues = football.get("top_leagues", []) or []
+    return {name for name in top_leagues if isinstance(name, str)}
 
 
 def load_existing_matches() -> List[Dict[str, Any]]:

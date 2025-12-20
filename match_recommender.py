@@ -11,7 +11,7 @@ from config_loader import load_config
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from football import fetch_football_matches, load_football_api_token, normalize_football_match
+from football import fetch_football_matches, load_allowed_competitions, load_football_api_token, normalize_football_match
 from cs2 import fetch_cs2_matches, load_cs2_api_token, normalize_cs2_match
 
 from time_utils import convert_utc_to_local_time
@@ -90,6 +90,7 @@ def build_prompt(user_profile: str, matches: List[Dict[str, Any]]) -> str:
    - id: 比赛 id（整数）
    - teams：比赛双方的队名，格式如 "队伍A vs 队伍B"，不要包括别的信息。如果不是电竞比赛，则把队名全部翻译成中文。如果是电竞比赛，则把队名的缩写扩展成队伍全名。
    - score: 推荐分数（0-100 的整数，越高越推荐）
+   - reason: 推荐理由（简短说明为什么推荐这场比赛，围绕用户兴趣展开）
 3. 只输出 JSON，不要任何额外解释、文字或代码块标记。
 """
 
@@ -224,6 +225,13 @@ def main():
     if football_token:
         try:
             raw_football_matches = fetch_football_matches(football_token)
+            allowed_competitions = load_allowed_competitions()
+            if allowed_competitions:
+                raw_football_matches = [
+                    match
+                    for match in raw_football_matches
+                    if (match.get("competition") or {}).get("name") in allowed_competitions
+                ]
             football_matches = [normalize_football_match(m) for m in raw_football_matches]
             print(f"已从 API 获取 {len(football_matches)} 场足球比赛。")
         except Exception as exc:
